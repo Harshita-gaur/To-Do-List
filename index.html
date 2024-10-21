@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background: linear-gradient(150deg, #153677, #4e085f);
+            height: 100vh;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .todo-app {
+            max-width: 540px;
+            background: #fff;
+            margin: 100px auto;
+            padding: 40px;
+            border-radius: 10px;
+        }
+        h1 {
+            justify-content: center;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #002765;
+        }
+        img {
+            width: 30px;
+            margin-left: 10px;
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            background: #edeef0;
+            border-radius: 30px;
+            margin-bottom: 25px;
+            padding-left: 20px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: none;
+            background: transparent;
+        }
+        button {
+            background-color: #1bb63c;
+            color: #fff;
+            padding: 16px 50px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        li {
+            font-size: 17px;
+            padding: 10px 8px 12px 50px;
+            user-select: none;
+            position: relative;
+            font-weight: bold;
+            list-style: none;
+        }
+        ul li::before {
+            content: '';
+            height: 28px;
+            width: 28px;
+            position: absolute;
+            border-radius: 50%;
+            background-image: url(images/unchecked.png); /* Replace with your unchecked circle image */
+            background-size: cover;
+            background-position: center;
+            top: 12px;
+            left: 8px;
+        }
+        ul li.checked::before {
+            background-image: url(images/checked.png); /* Replace with your checked circle image */
+        }
+        ul li.checked {
+            color: #555;
+            text-decoration: line-through;
+        }
+        li span {
+            position: absolute;
+            top: 5px;
+            right: 0;
+            font-size: 22px;
+            color: #555;
+            cursor: pointer;
+        }
+        li span:hover {
+            background: #edeef0;
+        }
+        .subtask-input {
+            margin-left: 40px;
+            padding: 5px;
+            width: 80%;
+            border: none;
+            background: #f2f2f2;
+            border-radius: 20px;
+        }
+        ol.subtasks {
+            margin-top: 10px;
+            padding-left: 60px;
+            counter-reset: subtask-counter;
+        }
+        ol.subtasks li {
+            font-size: 15px;
+            padding: 5px 8px;
+            margin-bottom: 5px;
+            position: relative;
+            list-style: none;
+        }
+        ol.subtasks li::before {
+            background-image: url(); 
+            counter-increment: subtask-counter;
+            content: counter(subtask-counter) ". ";
+            position: absolute;
+            left: -30px;
+            color: #555;
+        }
+
+        .home-btn{
+            background: #1bb63c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <a href="index.html"><button class="home-btn">Home</button></a>
+        <div class="todo-app">
+            <h1>To-Do List <img src="images/icon.png"></h1>
+            <div class="row">
+                <input type="text" id="taskInput" placeholder="Add a new task...">
+                <button onclick="addTask()">Add Task</button>
+            </div>
+            <ul id="taskList"></ul>
+        </div>
+    </div>
+
+    <script>
+        const taskList = document.getElementById('taskList');
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+
+            if (taskText !== '') {
+                let li = document.createElement('li');
+                li.innerHTML = `
+                  <span>\u00d7</span> ${taskText} 
+                    <input type="text" class="subtask-input" placeholder="Add a subtask..." onkeypress="addSubtask(event, this)">
+                    <ol class="subtasks"></ol>
+                `;
+                taskList.appendChild(li);
+            } else {
+                alert("YOU MUST DO SOMETHING!!!");
+            }
+            taskInput.value = '';
+            saveTasks();
+        }
+
+        function addSubtask(event, inputElement) {
+            if (event.key === "Enter") {
+                const subtaskText = inputElement.value.trim();
+                if (subtaskText !== '') {
+                    const subtaskList = inputElement.nextElementSibling;
+                    const subtask = document.createElement('li');
+                    subtask.textContent = subtaskText;
+                    subtaskList.appendChild(subtask);
+
+                    let span = document.createElement('span');
+                    span.textContent = "\u00d7";
+                    subtask.appendChild(span);
+
+                    inputElement.value = '';
+                    saveTasks();
+                } else {
+                    alert("Subtask cannot be empty!");
+                }
+            }
+        }
+
+        taskList.addEventListener("click", function(e) {
+            if (e.target.tagName === "LI" && e.target.className !== 'subtask-input') {
+                e.target.classList.toggle("checked");
+                saveTasks();
+            } else if (e.target.tagName === "SPAN") {
+                e.target.parentElement.remove();
+                saveTasks();
+            }
+        });
+
+        function saveTasks() {
+            localStorage.setItem("data", taskList.innerHTML);
+        }
+
+        function showData() {
+            const savedData = localStorage.getItem("data");
+            if (savedData) {
+                taskList.innerHTML = savedData;
+            }
+        }
+
+        showData();
+    </script>
+</body>
+</html>
